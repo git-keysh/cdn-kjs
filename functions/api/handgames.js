@@ -44,57 +44,75 @@ export async function onRequest(context) {
       return buf
     }
 
+    function crc32(buf) {
+      let crc = -1
+      for (let b of buf) {
+        crc ^= b
+        for (let k = 0; k < 8; k++) crc = (crc >>> 1) ^ (0xEDB88320 & -(crc & 1))
+      }
+      return (crc ^ -1) >>> 0
+    }
+
     function zipFiles(fileMap) {
       let zipParts = []
+      let centralDirectory = []
       let offset = 0
-      const centralDirectory = []
 
       for (const name in fileMap) {
-        const content = fileMap[name]
-        const contentBytes = typeof content === "string" ? strToUint8(content) : new Uint8Array(content)
-        const localHeader = new Uint8Array([
-          0x50,0x4b,0x03,0x04,
-          20,0, 0,0, 0,0, 0,0,
-          0,0,0,0,
-          contentBytes.length & 0xff,
-          (contentBytes.length >> 8) & 0xff,
-          (contentBytes.length >>16)&0xff,
-          (contentBytes.length >>24)&0xff,
-          contentBytes.length & 0xff,
-          (contentBytes.length >> 8) & 0xff,
-          (contentBytes.length >>16)&0xff,
-          (contentBytes.length >>24)&0xff,
-          name.length & 0xff,
-          (name.length >> 8) & 0xff
-        ])
-        zipParts.push(localHeader, strToUint8(name), contentBytes)
-        centralDirectory.push({ name, offset, size: contentBytes.length })
-        offset += localHeader.length + name.length + contentBytes.length
+        const contentBuf = new Uint8Array(fileMap[name])
+        const cksum = crc32(contentBuf)
+        const localHeader = new Uint8Array(30)
+        const dv = new DataView(localHeader.buffer)
+        dv.setUint32(0, 0x04034b50, true)
+        dv.setUint16(4, 20, true)
+        dv.setUint16(6, 0, true)
+        dv.setUint16(8, 0, true)
+        dv.setUint16(10, 0, true)
+        dv.setUint32(14, cksum, true)
+        dv.setUint32(18, contentBuf.length, true)
+        dv.setUint32(22, contentBuf.length, true)
+        dv.setUint16(26, name.length, true)
+        dv.setUint16(28, 0, true)
+        zipParts.push(localHeader, strToUint8(name), contentBuf)
+        centralDirectory.push({ name, offset, size: contentBuf.length, cksum })
+        offset += localHeader.length + name.length + contentBuf.length
       }
 
       let cdStart = offset
       for (const file of centralDirectory) {
-        const cdHeader = new Uint8Array([
-          0x50,0x4b,0x01,0x02,
-          20,0, 20,0, 0,0,0,0, 0,0,0,0,
-          file.size &0xff,(file.size>>8)&0xff,(file.size>>16)&0xff,(file.size>>24)&0xff,
-          file.size &0xff,(file.size>>8)&0xff,(file.size>>16)&0xff,(file.size>>24)&0xff,
-          file.name.length &0xff,(file.name.length>>8)&0xff,0,0,0,0,0,0,0,0,
-          file.offset &0xff,(file.offset>>8)&0xff,(file.offset>>16)&0xff,(file.offset>>24)&0xff
-        ])
+        const cdHeader = new Uint8Array(46)
+        const dv = new DataView(cdHeader.buffer)
+        dv.setUint32(0, 0x02014b50, true)
+        dv.setUint16(4, 20, true)
+        dv.setUint16(6, 20, true)
+        dv.setUint16(8, 0, true)
+        dv.setUint16(10, 0, true)
+        dv.setUint16(12, 0, true)
+        dv.setUint32(16, file.cksum, true)
+        dv.setUint32(20, file.size, true)
+        dv.setUint32(24, file.size, true)
+        dv.setUint16(28, file.name.length, true)
+        dv.setUint16(30, 0, true)
+        dv.setUint16(32, 0, true)
+        dv.setUint16(34, 0, true)
+        dv.setUint16(36, 0, true)
+        dv.setUint32(38, file.offset, true)
         zipParts.push(cdHeader, strToUint8(file.name))
         offset += cdHeader.length + file.name.length
       }
 
-      const eocd = new Uint8Array([
-        0x50,0x4b,0x05,0x06,
-        0,0, 0,0,
-        centralDirectory.length &0xff,(centralDirectory.length>>8)&0xff,
-        centralDirectory.length &0xff,(centralDirectory.length>>8)&0xff,
-        offset - cdStart &0xff,((offset - cdStart)>>8)&0xff,((offset - cdStart)>>16)&0xff,((offset - cdStart)>>24)&0xff,
-        0,0
-      ])
+      const eocd = new Uint8Array(22)
+      const dv = new DataView(eocd.buffer)
+      dv.setUint32(0, 0x06054b50, true)
+      dv.setUint16(4, 0, true)
+      dv.setUint16(6, 0, true)
+      dv.setUint16(8, centralDirectory.length, true)
+      dv.setUint16(10, centralDirectory.length, true)
+      dv.setUint32(12, offset - cdStart, true)
+      dv.setUint32(16, cdStart, true)
+      dv.setUint16(20, 0, true)
       zipParts.push(eocd)
+
       return new Blob(zipParts, { type: "application/zip" })
     }
 
