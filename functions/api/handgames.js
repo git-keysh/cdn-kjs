@@ -15,12 +15,17 @@ export async function onRequest(context) {
 
   if (action === "view") {
     const data = {};
-
     for (const f of files) {
-      const res = await context.env.ASSETS.fetch(
-        new Request(new URL(`/bin/${f}`, context.request.url))
-      );
-      data[f] = await res.text();
+      try {
+        const res = await fetch(new URL(`/bin/${f}`, context.request.url));
+        if (!res.ok) {
+          data[f] = `Error: ${res.status} ${res.statusText}`;
+        } else {
+          data[f] = await res.text();
+        }
+      } catch (err) {
+        data[f] = `Error fetching file: ${err.message}`;
+      }
     }
 
     return new Response(JSON.stringify(data, null, 2), {
@@ -33,18 +38,21 @@ export async function onRequest(context) {
       return new Response("File not found", { status: 404 });
     }
 
-    const res = await context.env.ASSETS.fetch(
-      new Request(new URL(`/bin/${file}`, context.request.url))
-    );
+    try {
+      const res = await fetch(new URL(`/bin/${file}`, context.request.url));
+      if (!res.ok) return new Response("File not found", { status: 404 });
 
-    const content = await res.arrayBuffer();
+      const content = await res.arrayBuffer();
 
-    return new Response(content, {
-      headers: {
-        "Content-Type": "application/octet-stream",
-        "Content-Disposition": `attachment; filename="${file}"`
-      }
-    });
+      return new Response(content, {
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "Content-Disposition": `attachment; filename="${file}"`
+        }
+      });
+    } catch (err) {
+      return new Response(`Error fetching file: ${err.message}`, { status: 500 });
+    }
   }
 
   if (action === "download" && type === "zip") {
