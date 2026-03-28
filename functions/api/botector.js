@@ -6,7 +6,10 @@ export async function POST(request) {
     const webhookURL = process.env.spiderwebb;
     
     if (!webhookURL) {
-      throw new Error("Webhook URL not configured");
+      return new Response(
+        JSON.stringify({ success: false, error: "Webhook URL not configured" }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
     }
     
     let locationData = null;
@@ -55,7 +58,7 @@ export async function POST(request) {
     }
     
     const embed = {
-      title: "🌐 IP Detection",
+      title: "🌐 Visitor Detection",
       color: 0x5865f2,
       fields: fields,
       footer: {
@@ -93,4 +96,3 @@ export async function POST(request) {
     );
   }
 }
-
