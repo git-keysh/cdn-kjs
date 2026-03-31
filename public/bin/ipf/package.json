@@ -1,0 +1,40 @@
+{
+  "name": "ipf",
+  "version": "1.0.0",
+  "description": "IPF - Advanced CLI IP Intelligence & Recon Tool",
+  "main": "bin/ipf.js",
+  "bin": {
+    "ipf": "./bin/ipf.js"
+  },
+  "type": "commonjs",
+  "scripts": {
+    "start": "node bin/ipf.js",
+    "dev": "node bin/ipf.js",
+    "build": "pkg . --targets node18-win-x64 --output dist/ipf.exe"
+  },
+  "keywords": [
+    "ip",
+    "cli",
+    "network",
+    "recon",
+    "geolocation",
+    "osint",
+    "security"
+  ],
+  "author": "Pat Williams (FAVnC)",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "axios": "^1.7.0",
+    "chalk": "4.1.2",
+    "boxen": "5.1.2"
+  },
+  "pkg": {
+    "assets": [
+      "config/config.json"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
+  }
+}

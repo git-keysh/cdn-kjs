@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "local": "public/bin/ipf/setPATH.bat",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/setPATH.bat"
+    },
+    {
+      "local": "public/bin/ipf/README.md",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/README.md"
+    },
+    {
+      "local": "public/bin/ipf/package.json",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/package.json"
+    },
+    {
+      "local": "public/bin/ipf/package-lock.json",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/package-lock.json"
+    },
+    {
+      "local": "public/bin/ipf/license.txt",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/license.txt"
+    },
+    {
+      "local": "public/bin/ipf/dist/ipf.exe",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/dist/ipf.exe"
+    },
+    {
+      "local": "public/bin/ipf/core/vpn.js",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/core/vpn.js"
+    },
+    {
+      "local": "public/bin/ipf/core/ports.js",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/core/ports.js"
+    },
+    {
+      "local": "public/bin/ipf/core/ping.js",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/core/ping.js"
+    },
+    {
+      "local": "public/bin/ipf/core/machine.js",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/core/machine.js"
+    },
+    {
+      "local": "public/bin/ipf/core/logger.js",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/core/logger.js"
+    },
+    {
+      "local": "public/bin/ipf/core/geo.js",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/core/geo.js"
+    },
+    {
+      "local": "public/bin/ipf/core/dns.js",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/core/dns.js"
+    },
+    {
+      "local": "public/bin/ipf/config/config.json",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/config/config.json"
+    },
+    {
+      "local": "public/bin/ipf/bin/ipf.js",
+      "url": "https://cdn-kjs.pages.dev/bin/ipf/bin/ipf.js"
+    }
+  ]
+}

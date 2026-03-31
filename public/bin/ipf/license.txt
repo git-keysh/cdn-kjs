@@ -1,0 +1,13 @@
+FAVnC License Agreement
+
+Copyright (c) 2025 Pat Williams (FAVnC)
+
+This software is licensed, not sold.
+
+Permission is granted to the licensee solely as outlined in the applicable purchase or distribution agreement. Unauthorized redistribution, sublicensing, resale, or sharing of this software, in whole or in part, is strictly prohibited without prior written consent from Pat Williams (FAVnC).
+
+All rights not expressly granted are reserved.
+
+Any violation of these terms will result in immediate termination of the license. Upon termination, the licensee must cease all use of the software and destroy all copies in their possession unless retention is required by applicable law.
+
+FAVnC reserves the right to pursue legal remedies, including but not limited to injunctive relief and damages, in the event of a breach of this agreement.
