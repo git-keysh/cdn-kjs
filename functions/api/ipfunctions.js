@@ -1,13 +1,14 @@
-import { json } from '@astrojs/cloudflare';
+import fs from 'fs';
+import path from 'path';
 
-const ZIP_URL = 'https://cdn-kjs.pages.dev/bin/ipf.zip';
+const ZIP_PATH = path.join(process.cwd(), 'public', 'bin', 'ipf.zip');
 
 export async function GET({ url }) {
-  const pathname = url.pathname; 
-  const query = pathname.split('=')[1]; 
+  const segments = url.pathname.split('/'); 
+  const action = segments[segments.length - 1].toLowerCase();
 
-  if (query === 'info') {
-    const readme = {
+  if (action === 'info') {
+    const info = {
       name: "IPF CLI",
       description: "Command-line tool for IP info, logging, and Discord webhook reporting.",
       features: [
@@ -24,16 +25,33 @@ export async function GET({ url }) {
         "https://cdn-kjs.pages.dev/bin/ipf/dist/ipf.exe -s <webhook> <ip>"
       ]
     };
-    return json(readme);
+
+    return new Response(JSON.stringify(info), {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
   }
 
-  if (query === 'download') {
-    const headers = new Headers();
-    headers.set('Content-Type', 'application/zip');
-    headers.set('Content-Disposition', 'attachment; filename="ipf.zip"');
+  if (action === 'download') {
+    if (!fs.existsSync(ZIP_PATH)) {
+      return new Response(JSON.stringify({ error: "Zip file not found." }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
-    return Response.redirect(ZIP_URL, 302, { headers });
+    const fileStream = fs.createReadStream(ZIP_PATH);
+    return new Response(fileStream, {
+      headers: {
+        'Content-Type': 'application/zip',
+        'Content-Disposition': 'attachment; filename="ipf.zip"'
+      }
+    });
   }
 
-  return json({ error: "Invalid request. Use =info or =download" });
+  return new Response(JSON.stringify({ error: "Invalid path. Use /info or /download" }), {
+    status: 400,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
