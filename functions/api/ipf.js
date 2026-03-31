@@ -1,11 +1,13 @@
-import { json, redirect } from '@astrojs/cloudflare';
+import { json } from '@astrojs/cloudflare';
+
+const ZIP_URL = 'https://cdn-kjs.pages.dev/bin/ipf.zip';
 
 export async function GET({ url }) {
   const info = url.searchParams.get('info');
   const download = url.searchParams.get('download');
 
   if (info !== null) {
-    return json({
+    const readme = {
       name: "IPF CLI",
       description: "Command-line tool for IP info, logging, and Discord webhook reporting.",
       features: [
@@ -21,11 +23,16 @@ export async function GET({ url }) {
         "https://cdn-kjs.pages.dev/bin/ipf/dist/ipf.exe -l <ip>",
         "https://cdn-kjs.pages.dev/bin/ipf/dist/ipf.exe -s <webhook> <ip>"
       ]
-    });
+    };
+    return json(readme);
   }
 
   if (download !== null) {
-    return redirect("https://cdn-kjs.pages.dev/bin/ipf.zip", 302);
+    const headers = new Headers();
+    headers.set('Content-Type', 'application/zip');
+    headers.set('Content-Disposition', 'attachment; filename="ipf.zip"');
+
+    return Response.redirect(ZIP_URL, 302, { headers });
   }
 
   return json({ error: "Invalid query. Use ?info or ?download" });
