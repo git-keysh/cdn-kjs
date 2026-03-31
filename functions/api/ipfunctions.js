@@ -4,7 +4,8 @@ import path from 'path';
 const ZIP_PATH = path.join(process.cwd(), 'public', 'bin', 'ipf.zip');
 
 export async function GET({ url }) {
-  const segments = url.pathname.split('/'); 
+  // Split path to get action
+  const segments = url.pathname.split('/'); // ['/api', 'ipfunctions', 'info']
   const action = segments[segments.length - 1].toLowerCase();
 
   if (action === 'info') {
