@@ -1,8 +1,4 @@
-import { json } from '@astrojs/cloudflare';
-import fetch from 'node-fetch';
-import archiver from 'archiver';
-
-const BASE = 'https://cdn-kjs.pages.dev/';
+import { json, redirect } from '@astrojs/cloudflare';
 
 export async function GET({ url }) {
   const info = url.searchParams.get('info');
@@ -20,40 +16,16 @@ export async function GET({ url }) {
         "Portable CLI with setup batch for global PATH"
       ],
       usage: [
-        `${BASE}bin/ipf/dist/ipf.exe <ip>`,
-        `${BASE}bin/ipf/dist/ipf.exe -m`,
-        `${BASE}bin/ipf/dist/ipf.exe -l <ip>`,
-        `${BASE}bin/ipf/dist/ipf.exe -s <webhook> <ip>`
+        "https://cdn-kjs.pages.dev/bin/ipf/dist/ipf.exe <ip>",
+        "https://cdn-kjs.pages.dev/bin/ipf/dist/ipf.exe -m",
+        "https://cdn-kjs.pages.dev/bin/ipf/dist/ipf.exe -l <ip>",
+        "https://cdn-kjs.pages.dev/bin/ipf/dist/ipf.exe -s <webhook> <ip>"
       ]
     });
   }
 
   if (download !== null) {
-    const res = await fetch(`${BASE}bin/ipf/files.json`);
-    const files = await res.json();
-
-    const archive = archiver('zip', { zlib: { level: 9 } });
-    const headers = new Headers();
-    headers.set('Content-Type', 'application/zip');
-    headers.set('Content-Disposition', 'attachment; filename="ipf_files.zip"');
-
-    const stream = new ReadableStream({
-      async start(controller) {
-        archive.on('data', chunk => controller.enqueue(chunk));
-        archive.on('end', () => controller.close());
-        archive.on('error', err => controller.error(err));
-
-        for (const file of files) {
-          const fileRes = await fetch(BASE + file.replace(/^public\//, ''));
-          const buffer = Buffer.from(await fileRes.arrayBuffer());
-          archive.append(buffer, { name: file.replace(/^public\//, '') });
-        }
-
-        archive.finalize();
-      }
-    });
-
-    return new Response(stream, { headers });
+    return redirect("https://cdn-kjs.pages.dev/bin/ipf.zip", 302);
   }
 
   return json({ error: "Invalid query. Use ?info or ?download" });
