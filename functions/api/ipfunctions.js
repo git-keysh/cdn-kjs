@@ -4,9 +4,8 @@ import path from 'path';
 const ZIP_PATH = path.join(process.cwd(), 'public', 'bin', 'ipf.zip');
 
 export async function GET({ url }) {
-  // Split path to get action
-  const segments = url.pathname.split('/'); // ['/api', 'ipfunctions', 'info']
-  const action = segments[segments.length - 1].toLowerCase();
+  const queryParams = new URL(url).searchParams;
+  const action = queryParams.get('ipfunctions');
 
   if (action === 'info') {
     const info = {
@@ -42,8 +41,8 @@ export async function GET({ url }) {
       });
     }
 
-    const fileStream = fs.createReadStream(ZIP_PATH);
-    return new Response(fileStream, {
+    const fileBuffer = fs.readFileSync(ZIP_PATH);
+    return new Response(fileBuffer, {
       headers: {
         'Content-Type': 'application/zip',
         'Content-Disposition': 'attachment; filename="ipf.zip"'
@@ -51,7 +50,7 @@ export async function GET({ url }) {
     });
   }
 
-  return new Response(JSON.stringify({ error: "Invalid path. Use /info or /download" }), {
+  return new Response(JSON.stringify({ error: "Invalid action. Use ?ipfunctions=info or ?ipfunctions=download" }), {
     status: 400,
     headers: { 'Content-Type': 'application/json' }
   });
