@@ -4,6 +4,7 @@ import threading
 import os
 from datetime import datetime
 import keyboard
+import pyperclip
 
 message = """**🐝 Fuzzy Alt Services Available 🐝**
 
@@ -23,7 +24,6 @@ __📩 **DM <@1456334115371487284>** to get added to the **Fuzzy Service GC** fo
 running = False
 interval = 360  # 6 minutes
 
-# Create log folder
 log_folder = "autolog"
 if not os.path.exists(log_folder):
     os.makedirs(log_folder)
@@ -33,18 +33,22 @@ def send_loop():
     while True:
         if running:
             try:
+                # Copy to clipboard
+                pyperclip.copy(message)
+
+                # Select all + delete
                 pyautogui.hotkey('ctrl', 'a')
-                time.sleep(0.2)
-
+                time.sleep(0.1)
                 pyautogui.press('delete')
-                time.sleep(0.2)
+                time.sleep(0.1)
 
-                pyautogui.write(message)
-                time.sleep(0.2)
+                # PASTE (instant, not typing)
+                pyautogui.hotkey('ctrl', 'v')
+                time.sleep(0.1)
 
                 pyautogui.press('enter')
 
-                # Screenshot + log
+                # Logging
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 screenshot_path = os.path.join(log_folder, f"{timestamp}.png")
                 log_path = os.path.join(log_folder, "log.txt")
@@ -69,11 +73,10 @@ def toggle():
     running = not running
     print("STARTED" if running else "STOPPED")
 
-# Hotkey (press F8 to toggle)
 keyboard.add_hotkey("F8", toggle)
 
 print("Press F8 to START/STOP")
-print("Switch to Discord before starting...")
+print("Make sure Discord chat is focused")
 
 threading.Thread(target=send_loop, daemon=True).start()
 
