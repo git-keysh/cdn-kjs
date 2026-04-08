@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyshburt API • Instagram Analyzer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 20% 30%, #0d0d1a, #05050f);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            padding: 2rem;
+            color: #ededf5;
+        }
+
+        .glass-card {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(18, 18, 30, 0.85);
+            backdrop-filter: blur(16px);
+            border-radius: 2rem;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0.5rem;
+        }
+
+        .header i {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #feda77, #f58529, #dd2a7b, #8134af);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .badge {
+            background: #1e1e2e;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .sub {
+            color: #8b8ca3;
+            font-size: 0.85rem;
+            margin: 0.8rem 0 1.5rem 0;
+            border-left: 3px solid #f58529;
+            padding-left: 14px;
+        }
+
+        /* Rate limit banner */
+        .limit-banner {
+            background: #0a0a14;
+            border-radius: 1rem;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border: 1px solid #2a2a3a;
+        }
+
+        .limit-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timer {
+            font-family: monospace;
+            font-size: 1.2rem;
+            background: #00000066;
+            padding: 6px 14px;
+            border-radius: 30px;
+        }
+
+        .bypass-code {
+            background: #2a2a3a;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .bypass-code:hover {
+            background: #f58529;
+            color: #000;
+        }
+
+        /* input */
+        .search-area {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .ig-input {
+            flex: 2;
+            background: #0a0a14;
+            border: 1px solid #2a2a3a;
+            border-radius: 60px;
+            padding: 14px 20px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .ig-input:focus {
+            outline: none;
+            border-color: #f58529;
+        }
+
+        .btn-primary {
+            background: linear-gradient(95deg, #f58529, #dd2a7b);
+            border: none;
+            padding: 0 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* profile card */
+        .profile-card {
+            background: #0a0a14cc;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin: 20px 0;
+        }
+
+        .profile-flex {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f58529, #dd2a7b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar img {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .stats-grid {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: #05050f;
+            padding: 10px 20px;
+            border-radius: 40px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .stat-number {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #f58529;
+        }
+
+        .insight-list {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .insight-item {
+            background: #0a0a14;
+            border-radius: 1rem;
+            padding: 14px 18px;
+            border-left: 3px solid #f58529;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .error-msg { background: #7f1a2e; border-left: 4px solid #f43f5e; }
+        .success-msg { background: #0f5c3a; border-left: 4px solid #10b981; }
+        .info-msg { background: #1e3a5f; border-left: 4px solid #3b82f6; }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #5a5a77;
+        }
+    </style>
+</head>
+<body>
+<div class="glass-card">
+    <div class="header">
+        <i class="fab fa-instagram"></i>
+        <h1>Keyshburt API <span class="badge">Instagram Intelligence</span></h1>
+    </div>
+    <div class="sub">⚡ Real Instagram data • 1 request per IP every 12 hours • <strong style="color:#f58529">rm delay-authkeyshaun</strong> in console = unlimited</div>
+
+    <!-- Rate limit banner -->
+    <div class="limit-banner" id="rateBanner">
+        <div class="limit-status">
+            <i class="fas fa-shield-alt"></i> <span id="rateStatus">Checking...</span>
+        </div>
+        <div class="timer" id="timerText">—</div>
+        <div class="bypass-code" id="showBypassHint"><i class="fas fa-keyboard"></i> bypass</div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-area">
+        <input type="text" class="ig-input" id="username" placeholder="Instagram username (therock, kyliejenner)" value="therock">
+        <button class="btn-primary" id="analyzeBtn"><i class="fab fa-instagram"></i> Analyze</button>
+    </div>
+
+    <div id="msgArea"></div>
+    <div id="profileArea" style="display: none;"></div>
+    <div id="insightArea" style="display: none;"></div>
+    <footer>🔐 Keyshburt API — rate limit per device. Console: <span style="font-family:monospace; background:#000; padding:2px 6px; border-radius:8px;">rm delay-authkeyshaun</span> removes delay</footer>
+</div>
+
+<script>
+    // ============================================================
+    // KEYSHTBURT API - WORKING ENDPOINT (Instagram Scraper)
+    // ============================================================
+    const API_KEY = "f56aba4929mshdf0a3c096d13c09p16562djsn0837baebfa57";
+    
+    // Using a WORKING Instagram API endpoint (Instagram Scraper 2026)
+    const PROFILE_ENDPOINT = "https://instagram-scraper-2026.p.rapidapi.com/info";
+    const FOLLOWERS_ENDPOINT = "https://instagram-scraper-2026.p.rapidapi.com/followers";
+    const FOLLOWING_ENDPOINT = "https://instagram-scraper-2026.p.rapidapi.com/following";
+    
+    const RAPIDAPI_HOST = "instagram-scraper-2026.p.rapidapi.com";
+
+    // Rate limit: 1 request per 12 hours per IP (simulated with device fingerprint)
+    const RATE_LIMIT_HOURS = 12;
+    const STORAGE_PREFIX = "keyshburt_ratelimit_";
+
+    let bypassActive = false;
+    let currentProfileData = null;
+
+    // ========== Rate Limit Functions ==========
+    function getDeviceId() {
+        let id = localStorage.getItem("keyshburt_device_id");
+        if (!id) {
+            id = "dev_" + Math.random().toString(36).substring(2) + "_" + Date.now();
+            localStorage.setItem("keyshburt_device_id", id);
+        }
+        return id;
+    }
+
+    function getRateLimit() {
+        const device = getDeviceId();
+        const stored = localStorage.getItem(STORAGE_PREFIX + device);
+        if (!stored) return { lastRequest: null };
+        try {
+            return JSON.parse(stored);
+        } catch { return { lastRequest: null }; }
+    }
+
+    function setRateLimit() {
+        const device = getDeviceId();
+        localStorage.setItem(STORAGE_PREFIX + device, JSON.stringify({ lastRequest: Date.now() }));
+    }
+
+    function canMakeRequest() {
+        if (bypassActive) return true;
+        const data = getRateLimit();
+        if (!data.lastRequest) return true;
+        const hoursSince = (Date.now() - data.lastRequest) / (1000 * 60 * 60);
+        return hoursSince >= RATE_LIMIT_HOURS;
+    }
+
+    function getRemainingTime() {
+        if (bypassActive) return { text: "∞ (bypass)", blocked: false };
+        const data = getRateLimit();
+        if (!data.lastRequest) return { text: "Ready ✅", blocked: false };
+        const elapsed = Date.now() - data.lastRequest;
+        const remainingMs = (RATE_LIMIT_HOURS * 60 * 60 * 1000) - elapsed;
+        if (remainingMs <= 0) return { text: "Ready ✅", blocked: false };
+        const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+        const minutes = Math.floor((remainingMs % (3600000)) / 60000);
+        const seconds = Math.floor((remainingMs % 60000) / 1000);
+        return { text: `${hours}h ${minutes}m ${seconds}s`, blocked: true };
+    }
+
+    function updateRateUI() {
+        const status = getRemainingTime();
+        const canUse = canMakeRequest();
+        const statusSpan = document.getElementById('rateStatus');
+        const timerSpan = document.getElementById('timerText');
+        const btn = document.getElementById('analyzeBtn');
+        
+        if (bypassActive) {
+            statusSpan.innerHTML = '<i class="fas fa-unlock-alt"></i> Unlimited (bypass)';
+            timerSpan.innerHTML = '🚀 ACTIVE';
+            btn.disabled = false;
+            return;
+        }
+        
+        if (canUse) {
+            statusSpan.innerHTML = '<i class="fas fa-check-circle" style="color:#10b981"></i> Available';
+            timerSpan.innerHTML = 'Click to analyze';
+            btn.disabled = false;
+        } else {
+            statusSpan.innerHTML = '<i class="fas fa-hourglass-half" style="color:#f59e0b"></i> Rate limited (12h)';
+            timerSpan.innerHTML = status.text;
+            btn.disabled = true;
+            
+            // Auto-refresh timer every second
+            if (window.timerInterval) clearInterval(window.timerInterval);
+            window.timerInterval = setInterval(() => {
+                if (bypassActive) {
+                    clearInterval(window.timerInterval);
+                    updateRateUI();
+                    return;
+                }
+                const newStatus = getRemainingTime();
+                if (!newStatus.blocked) {
+                    updateRateUI();
+                    clearInterval(window.timerInterval);
+                } else {
+                    timerSpan.innerHTML = newStatus.text;
+                }
+            }, 1000);
+        }
+    }
+
+    // ========== BYPASS COMMAND ==========
+    // Console command: rm("delay-authkeyshaun")
+    window.rm = function(cmd) {
+        if (cmd === "delay-authkeyshaun") {
+            bypassActive = true;
+            if (window.timerInterval) clearInterval(window.timerInterval);
+            updateRateUI();
+            showMessage("✅ Bypass activated! Rate limit removed for this session.", "success");
+            return "Bypass active — unlimited requests";
+        }
+        return "Unknown command. Use: rm('delay-authkeyshaun')";
+    };
+    
+    // Also allow direct: rm.delayAuth()
+    window.rm.delayAuth = () => window.rm("delay-authkeyshaun");
+    
+    console.log("%c🔥 KEYSHTBURT API READY", "color: #f58529; font-size: 14px; font-weight: bold;");
+    console.log("%c➡️ Type: rm('delay-authkeyshaun')  to remove 12h rate limit", "color: #a78bfa; font-size: 12px;");
+
+    // ========== UI Helpers ==========
+    function showMessage(msg, type = "info") {
+        const msgDiv = document.getElementById('msgArea');
+        const cls = type === "error" ? "error-msg" : (type === "success" ? "success-msg" : "info-msg");
+        msgDiv.innerHTML = `<div class="message ${cls}">${msg}</div>`;
+        setTimeout(() => {
+            if (msgDiv.innerHTML.includes(msg)) msgDiv.innerHTML = "";
+        }, 5000);
+    }
+
+    function formatNumber(num) {
+        if (!num) return "0";
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+        if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+        return num.toString();
+    }
+
+    // ========== REAL API CALL (WORKING ENDPOINT) ==========
+    async function fetchInstagramProfile(username) {
+        const url = `${PROFILE_ENDPOINT}?user=${encodeURIComponent(username)}`;
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "x-rapidapi-key": API_KEY,
+                "x-rapidapi-host": RAPIDAPI_HOST,
+                "Content-Type": "application/json"
+            }
+        });
+        
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`API ${response.status}: ${errText.slice(0, 100)}`);
+        }
+        
+        const data = await response.json();
+        // The API returns { data: { user: {...} } }
+        if (!data || !data.data || !data.data.user) {
+            throw new Error("User not found or private account");
+        }
+        return data.data.user;
+    }
+
+    // ========== Render Profile & Stats ==========
+    function renderProfile(user) {
+        const profileHtml = `
+            <div class="profile-card">
+                <div class="profile-flex">
+                    <div class="avatar">
+                        <img src="${user.profile_pic_url_hd || user.profile_pic_url}" onerror="this.src='https://ui-avatars.com/api/?background=f58529&color=fff&name=${user.username}'">
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: bold;">${user.username} ${user.is_verified ? '✓' : ''}</div>
+                        <div style="color: #aaa; font-size: 0.8rem;">${user.full_name || ''}</div>
+                        <div style="font-size: 0.75rem; margin-top: 5px;">${user.biography || 'No bio'}</div>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box"><div class="stat-number">${formatNumber(user.media_count)}</div><div>Posts</div></div>
+                    <div class="stat-box"><div class="stat-number">${formatNumber(user.follower_count)}</div><div>Followers</div></div>
+                    <div class="stat-box"><div class="stat-number">${formatNumber(user.following_count)}</div><div>Following</div></div>
+                </div>
+            </div>
+        `;
+        
+        const insightHtml = `
+            <div style="margin-top: 20px;">
+                <div style="font-weight: 600; margin-bottom: 12px;"><i class="fas fa-chart-simple"></i> Keyshburt Insights</div>
+                <div class="insight-list">
+                    <div class="insight-item"><strong>🏷️ Account type</strong><br>${user.is_business_account ? 'Business / Creator' : 'Personal'}</div>
+                    <div class="insight-item"><strong>🔗 External link</strong><br>${user.external_url ? `<a href="${user.external_url}" target="_blank" style="color:#f58529">${user.external_url}</a>` : '—'}</div>
+                    <div class="insight-item"><strong>📅 Joined IG</strong><br>${user.edge_owner_to_timeline_media?.edges?.[0]?.node?.taken_at_timestamp ? new Date(user.edge_owner_to_timeline_media.edges[0].node.taken_at_timestamp * 1000).toLocaleDateString() : 'N/A'}</div>
+                </div>
+                <div style="background: #05050f; border-radius: 1rem; padding: 10px; margin-top: 15px; font-size: 0.7rem; text-align: center;">
+                    <i class="fas fa-database"></i> Powered by Keyshburt API • Instagram real-time data
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('profileArea').style.display = 'block';
+        document.getElementById('insightArea').style.display = 'block';
+        document.getElementById('profileArea').innerHTML = profileHtml;
+        document.getElementById('insightArea').innerHTML = insightHtml;
+    }
+
+    // ========== Main Analyze Function ==========
+    async function analyze() {
+        if (!canMakeRequest()) {
+            const remaining = getRemainingTime();
+            showMessage(`⛔ Rate limit active. Next request available in ${remaining.text}. Use console: rm('delay-authkeyshaun') to bypass`, "error");
+            return;
+        }
+        
+        const usernameInput = document.getElementById('username').value.trim();
+        if (!usernameInput) {
+            showMessage("Please enter an Instagram username", "error");
+            return;
+        }
+        
+        const username = usernameInput.replace(/^@/, '').split('/')[0].split('?')[0];
+        const btn = document.getElementById('analyzeBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Fetching...';
+        
+        document.getElementById('profileArea').style.display = 'none';
+        document.getElementById('insightArea').style.display = 'none';
+        
+        try {
+            const userData = await fetchInstagramProfile(username);
+            currentProfileData = userData;
+            
+            // Record this request (if bypass not active)
+            if (!bypassActive) {
+                setRateLimit();
+            }
+            updateRateUI();
+            
+            renderProfile(userData);
+            showMessage(`✅ Successfully fetched @${username} via Keyshburt API`, "success");
+        } catch (err) {
+            console.error(err);
+            let errorMsg = err.message;
+            if (errorMsg.includes("404")) errorMsg = "User not found or API subscription issue. Make sure you're subscribed to Instagram Scraper API on RapidAPI.";
+            if (errorMsg.includes("private")) errorMsg = "This account is private. Cannot fetch data.";
+            showMessage(`❌ ${errorMsg}`, "error");
+            document.getElementById('profileArea').innerHTML = `<div class="message error-msg">⚠️ ${errorMsg}</div>`;
+            document.getElementById('profileArea').style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    // ========== Event Listeners ==========
+    document.getElementById('analyzeBtn').addEventListener('click', analyze);
+    document.getElementById('username').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') analyze();
+    });
+    document.getElementById('showBypassHint').addEventListener('click', () => {
+        showMessage("🔓 Open console (F12) and type: <code style='background:#000;padding:2px 6px;border-radius:6px;'>rm('delay-authkeyshaun')</code> to remove 12h limit", "info");
+    });
+    
+    // Initialize
+    updateRateUI();
+</script>
+</body>
+</html>
