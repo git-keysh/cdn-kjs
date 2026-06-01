@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Keyshirt Design</title>
+<link rel="stylesheet" href="designer.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+    Keyshirt Design
+</div>
+
+<div class="main">
+
+    <div class="leftbar">
+        <button id="addText">Text</button>
+        <button id="uploadBtn">Import</button>
+        <button id="drawBtn">Brush</button>
+        <input type="file" id="imageUpload" hidden accept="image/*">
+    </div>
+
+    <div class="canvasWrap">
+        <div class="shirtArea">
+            <img id="shirtImage" src="/assets/blackshirt.png">
+            <canvas id="designer"></canvas>
+        </div>
+    </div>
+
+    <div class="rightbar">
+        <button id="downloadPNG">PNG</button>
+        <button id="downloadPDF">PDF</button>
+    </div>
+
+</div>
+
+<div class="colors">
+    <img src="https://cdn-kjs.pages.dev/assets/blackshirt.png" data-shirt="/assets/blackshirt.png">
+    <img src="https://cdn-kjs.pages.dev/assets/blueshirt.png" data-shirt="/assets/blueshirt.png">
+    <img src="https://cdn-kjs.pages.dev/assets/greyshirt.png" data-shirt="/assets/greyshirt.png">
+    <img src="https://cdn-kjs.pages.dev/assets/redshirt.png" data-shirt="/assets/redshirt.png">
+    <img src="https://cdn-kjs.pages.dev/assets/whiteshirt.png" data-shirt="/assets/whiteshirt.png">
+</div>
+
+<script src="designer.js"></script>
+
+</body>
+</html>
